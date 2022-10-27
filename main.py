@@ -90,6 +90,8 @@ class MainWindow(QMainWindow):
         self.ui.ok_btn.clicked.connect(self.ok_click)
         self.ui.save_btn.clicked.connect(self.save_table)
         self.ui.copy_btn.clicked.connect(self.copy_table)
+        self.ui.label_save.mousePressEvent = self.save_table
+        self.ui.label_copy.mousePressEvent = self.copy_table
 
         self.ui.size_spinbox.valueChanged.connect(self.size_changed)
         self.ui.thickness_spinbox.valueChanged.connect(self.thickness_changed)
@@ -195,7 +197,7 @@ class MainWindow(QMainWindow):
         if self.check_levels():
             self.draw_table()
 
-    def save_table(self):
+    def save_table(self, *arg, **kwargs):
         try:
             self.draw_table()
             options = QFileDialog.Options()
@@ -206,8 +208,8 @@ class MainWindow(QMainWindow):
         except:
             pass
     
-    def copy_table(self):
-        self.draw_table()
+    def copy_table(self, *arg, **kwargs):
+        self.draw(True)
         qt_image1 = ImageQt.ImageQt(self.image)
         qt_image2 = QPixmap.fromImage(qt_image1)
         QApplication.clipboard().setPixmap(qt_image2)
@@ -221,7 +223,7 @@ class MainWindow(QMainWindow):
 
     def get_geometry(self):
         try:
-            width, height = self.thickness*2, self.cell_size*2
+            width, height = self.thickness*2, self.cell_size*1.2
 
             lvl = "1"
             for level in entry:
@@ -237,11 +239,14 @@ class MainWindow(QMainWindow):
             return (1, 1)
             
 
-    def draw(self):
-        self.x, y = self.thickness, self.image.height
-        self.x1, y1 = self.cell_size + self.thickness, y - self.cell_size
+    def draw(self, no_alpha = False):
+        self.x, y = self.thickness, self.image.height - 1
+        self.x1, y1 = self.cell_size + self.thickness, y - self.cell_size - 1
         im = ImageDraw.Draw(self.image)
-        im.rectangle((0, 0, self.image.width, self.image.height), fill=(0, 0, 0, 0))
+        if no_alpha:
+            im.rectangle((0, 0, self.image.width, self.image.height), fill=(255, 255, 255, 255))
+        else:
+            im.rectangle((0, 0, self.image.width, self.image.height), fill=(0, 0, 0, 0))
 
         lvl = "1"
         slvl = 's'
